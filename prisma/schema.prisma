@@ -1,0 +1,80 @@
+// Prisma schema for QLD Youth KOSTA community app.
+// Uses SQLite for zero-setup deployment; swap `provider` for Postgres later.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PrayerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ResourceType {
+  PDF
+  IMAGE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+
+  prayerNotes PrayerNote[]
+  comments    Comment[]
+  resources   Resource[]
+}
+
+model PrayerNote {
+  id        String        @id @default(cuid())
+  title     String
+  content   String
+  status    PrayerStatus  @default(PENDING)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  comments  Comment[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model Comment {
+  id            String     @id @default(cuid())
+  content       String
+  author        User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId      String
+  prayerNote    PrayerNote @relation(fields: [prayerNoteId], references: [id], onDelete: Cascade)
+  prayerNoteId  String
+  createdAt     DateTime   @default(now())
+
+  @@index([prayerNoteId, createdAt])
+}
+
+model Resource {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String       // public URL path, e.g. /uploads/abc.pdf
+  fileName    String       // original file name
+  fileType    ResourceType
+  uploader    User         @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  uploaderId  String
+  createdAt   DateTime     @default(now())
+
+  @@index([createdAt])
+}

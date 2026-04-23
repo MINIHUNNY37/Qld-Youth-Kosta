@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ensureAdminBootstrap } from "@/lib/bootstrap";
 import { PrayerCard } from "@/components/PrayerCard";
+import { QrCard } from "@/components/QrCard";
 import { formatDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -14,10 +15,6 @@ export default async function HomePage() {
       where: { status: "APPROVED" },
       orderBy: { createdAt: "desc" },
       take: 3,
-      include: {
-        author: { select: { name: true } },
-        _count: { select: { comments: true } },
-      },
     }),
     prisma.resource.findMany({
       orderBy: { createdAt: "desc" },
@@ -55,9 +52,14 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* QR code */}
+      <section className="mx-auto max-w-6xl px-5 pt-12">
+        <QrCard />
+      </section>
+
       {/* Recent prayers */}
       <section className="mx-auto max-w-6xl px-5 py-14">
-        <div className="flex items-end justify-between mb-6 gap-4">
+        <div className="flex items-end justify-between mb-8 gap-4">
           <div>
             <h2 className="section-title">Latest prayer notes</h2>
             <p className="text-ink-700/80 mt-1">
@@ -83,7 +85,7 @@ export default async function HomePage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {recentPrayers.map((p) => (
               <PrayerCard
                 key={p.id}
@@ -92,8 +94,10 @@ export default async function HomePage() {
                   title: p.title,
                   content: p.content,
                   createdAt: p.createdAt,
-                  author: { name: p.author.name },
-                  _count: p._count,
+                  isAnonymous: p.isAnonymous,
+                  authorName: p.authorName,
+                  prayedCount: p.prayedCount,
+                  heartCount: p.heartCount,
                 }}
               />
             ))}

@@ -7,6 +7,16 @@ import { AdminActions } from "./AdminActions";
 
 export const dynamic = "force-dynamic";
 
+function describeAuthor(n: {
+  isAnonymous: boolean;
+  authorName: string;
+  author: { name: string; email?: string | null } | null;
+}) {
+  if (n.isAnonymous) return "익명 · Anon";
+  if (n.author?.email) return `${n.author.name} <${n.author.email}>`;
+  return n.authorName;
+}
+
 export default async function AdminPage() {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -58,9 +68,7 @@ export default async function AdminPage() {
                 <div className="flex flex-wrap items-center gap-2 text-xs text-ink-700/70 mb-2">
                   <span>{formatDateTime(n.createdAt)}</span>
                   <span aria-hidden>·</span>
-                  <span>
-                    {n.author.name} &lt;{n.author.email}&gt;
-                  </span>
+                  <span>{describeAuthor(n)}</span>
                 </div>
                 <h3 className="font-display text-xl text-ink-800 mb-2">
                   {n.title}
@@ -88,7 +96,7 @@ export default async function AdminPage() {
               <li key={n.id} className="card !p-5">
                 <div className="flex items-center justify-between gap-2 mb-1 text-xs text-ink-700/70">
                   <span>{formatDateTime(n.createdAt)}</span>
-                  <span>{n.author.name}</span>
+                  <span>{describeAuthor(n)}</span>
                 </div>
                 <Link
                   href={`/prayers/${n.id}`}
@@ -119,7 +127,7 @@ export default async function AdminPage() {
                 <div>
                   <p className="font-semibold text-ink-800">{n.title}</p>
                   <p className="text-xs text-ink-700/70">
-                    {n.author.name} · {formatDateTime(n.createdAt)}
+                    {describeAuthor(n)} · {formatDateTime(n.createdAt)}
                   </p>
                 </div>
                 <AdminActions prayerId={n.id} showApprove showDelete />

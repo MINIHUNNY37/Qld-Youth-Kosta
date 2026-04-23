@@ -14,6 +14,8 @@ export const loginSchema = z.object({
 export const prayerNoteSchema = z.object({
   title: z.string().trim().min(1).max(120),
   content: z.string().trim().min(1).max(4000),
+  authorName: z.string().trim().max(40).optional(),
+  isAnonymous: z.boolean().optional().default(false),
 });
 
 export const commentSchema = z.object({

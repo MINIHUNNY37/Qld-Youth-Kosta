@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   }
 
   const notes = await prisma.prayerNote.findMany({
-    where: { status: statusFilter as "PENDING" | "APPROVED" | "REJECTED" },
+    where: { status: statusFilter },
     orderBy: { createdAt: "desc" },
     include: {
       author: { select: { id: true, name: true } },
@@ -31,12 +31,9 @@ export async function GET(req: Request) {
   return NextResponse.json({ notes });
 }
 
-// POST /api/prayers — any signed-in user may submit. Lands in PENDING.
+// POST /api/prayers — anyone may submit (signed-in or anonymous). Lands in PENDING.
 export async function POST(req: Request) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  }
 
   let body: unknown;
   try {
@@ -53,11 +50,19 @@ export async function POST(req: Request) {
     );
   }
 
+  const { title, content, isAnonymous, authorName } = parsed.data;
+
+  // Resolve display name: signed-in user's name, or provided name, or "Anon".
+  const resolvedName =
+    (authorName && authorName.length > 0 ? authorName : session?.name) ?? "Anon";
+
   const note = await prisma.prayerNote.create({
     data: {
-      title: parsed.data.title,
-      content: parsed.data.content,
-      authorId: session.sub,
+      title,
+      content,
+      isAnonymous: !!isAnonymous,
+      authorName: isAnonymous ? "Anon" : resolvedName,
+      authorId: session?.sub ?? null,
       status: "PENDING",
     },
   });

@@ -27,7 +27,7 @@ export default async function PrayerDetailPage({
   if (!note) notFound();
 
   const isAdmin = session?.role === "ADMIN";
-  const isAuthor = session?.sub === note.authorId;
+  const isAuthor = !!note.authorId && session?.sub === note.authorId;
   if (note.status !== "APPROVED" && !isAdmin && !isAuthor) notFound();
 
   return (
@@ -46,7 +46,9 @@ export default async function PrayerDetailPage({
           </span>
           <span>{formatDate(note.createdAt)}</span>
           <span aria-hidden>·</span>
-          <span>by {note.author.name}</span>
+          <span>
+            {note.isAnonymous ? "익명 · Anon" : `by ${note.authorName}`}
+          </span>
         </div>
         <h1 className="font-display text-4xl text-ink-800 leading-tight mb-5">
           {note.title}
@@ -55,6 +57,16 @@ export default async function PrayerDetailPage({
           <p className="whitespace-pre-line text-[1.05rem] leading-relaxed text-ink-800">
             {note.content}
           </p>
+          <div className="mt-5 pt-4 border-t border-cream-200 flex items-center gap-4 text-sm text-ink-700/80">
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>🙏</span>
+              {note.prayedCount} prayed
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>❤️</span>
+              {note.heartCount}
+            </span>
+          </div>
         </div>
       </article>
 

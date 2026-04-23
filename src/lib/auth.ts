@@ -2,7 +2,8 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
-import type { Role } from "@prisma/client";
+
+export type Role = "USER" | "ADMIN";
 
 const COOKIE_NAME = "kosta_session";
 const SESSION_TTL = 60 * 60 * 24 * 30; // 30 days

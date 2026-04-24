@@ -59,9 +59,10 @@ model Resource {
   id          String   @id @default(cuid())
   title       String
   description String?
-  fileUrl     String   // public URL path, e.g. /uploads/abc.pdf
-  fileName    String   // original file name
-  fileType    String   // "PDF" | "IMAGE"
+  fileUrl     String?  // present for PDF/IMAGE, null for LYRICS
+  fileName    String?  // present for PDF/IMAGE, null for LYRICS
+  fileType    String   // "PDF" | "IMAGE" | "LYRICS"
+  lyrics      String?  // present when fileType == "LYRICS"
   uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
   uploaderId  String
   createdAt   DateTime @default(now())

@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PrayerCard } from "@/components/PrayerCard";
+import { t } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function PrayersPage() {
+  const lang = getServerLang();
   const notes = await prisma.prayerNote.findMany({
     where: { status: "APPROVED" },
     orderBy: { createdAt: "desc" },
@@ -14,26 +17,22 @@ export default async function PrayersPage() {
     <div className="mx-auto max-w-6xl px-5 py-12">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="section-title">Prayer notes</h1>
+          <h1 className="section-title">{t("prayers.title", lang)}</h1>
           <p className="text-ink-700/80 mt-1 max-w-2xl">
-            Every note you see here has been approved by an admin. Tap{" "}
-            <span className="font-semibold">I prayed</span> after praying, or
-            send a heart of encouragement.
+            {t("prayers.subtitle", lang)}
           </p>
         </div>
         <Link href="/prayers/new" className="btn-primary whitespace-nowrap">
-          + Share a prayer
+          {t("prayers.share", lang)}
         </Link>
       </div>
 
       {notes.length === 0 ? (
         <div className="card text-center">
-          <p className="text-ink-700/80 text-lg">
-            No approved prayer notes yet. Be the first to share one.
-          </p>
+          <p className="text-ink-700/80 text-lg">{t("prayers.empty", lang)}</p>
           <div className="mt-4">
             <Link href="/prayers/new" className="btn-primary">
-              Share the first prayer
+              {t("prayers.shareFirst", lang)}
             </Link>
           </div>
         </div>

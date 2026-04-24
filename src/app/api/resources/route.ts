@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import {
@@ -11,13 +9,6 @@ import {
   resourceMetaSchema,
   lyricsResourceSchema,
 } from "@/lib/validations";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
-
-function safeExt(name: string): string {
-  const ext = path.extname(name).toLowerCase();
-  return /^\.[a-z0-9]{1,8}$/.test(ext) ? ext : "";
-}
 
 export async function GET() {
   const resources = await prisma.resource.findMany({
@@ -66,7 +57,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ resource });
   }
 
-  // Branch 2 — multipart file upload (PDF / image).
+  // Branch 2 — multipart file upload (PDF / image) → Vercel Blob.
   const form = await req.formData();
   const file = form.get("file");
   const title = form.get("title");
@@ -99,18 +90,28 @@ export async function POST(req: Request) {
     );
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  const ext = safeExt(file.name) || (mime === "application/pdf" ? ".pdf" : "");
-  const storedName = `${randomUUID()}${ext}`;
-  const diskPath = path.join(UPLOAD_DIR, storedName);
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(diskPath, buffer);
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      {
+        error:
+          "File storage is not configured. Connect a Vercel Blob store and set BLOB_READ_WRITE_TOKEN.",
+      },
+      { status: 500 }
+    );
+  }
+
+  // Give the blob a unique, type-scoped name so deletions are easy to trace.
+  const blob = await put(`resources/${crypto.randomUUID()}-${file.name}`, file, {
+    access: "public",
+    contentType: file.type,
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  });
 
   const resource = await prisma.resource.create({
     data: {
       title: meta.data.title,
       description: meta.data.description,
-      fileUrl: `/uploads/${storedName}`,
+      fileUrl: blob.url,
       fileName: file.name,
       fileType: resourceType,
       uploaderId: session.sub,

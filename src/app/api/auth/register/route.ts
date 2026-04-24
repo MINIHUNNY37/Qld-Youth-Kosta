@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, setSessionCookie } from "@/lib/auth";
+import { hashPassword, setSessionCookie, type Role } from "@/lib/auth";
 import { registerSchema } from "@/lib/validations";
 import { ensureAdminBootstrap } from "@/lib/bootstrap";
 
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     sub: user.id,
     email: user.email,
     name: user.name,
-    role: user.role,
+    role: user.role as Role,
   });
 
   return NextResponse.json({

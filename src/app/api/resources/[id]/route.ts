@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { unlink } from "node:fs/promises";
-import path from "node:path";
+import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
@@ -29,10 +28,11 @@ export async function DELETE(
 
   await prisma.resource.delete({ where: { id: params.id } });
 
-  // Best-effort cleanup of the stored file. Ignore errors (missing file, etc.)
-  if (resource.fileUrl) {
-    const diskPath = path.join(process.cwd(), "public", resource.fileUrl);
-    unlink(diskPath).catch(() => {});
+  // Best-effort blob cleanup. Ignore errors (missing blob, token missing, etc.)
+  if (resource.fileUrl && process.env.BLOB_READ_WRITE_TOKEN) {
+    del(resource.fileUrl, { token: process.env.BLOB_READ_WRITE_TOKEN }).catch(
+      () => {}
+    );
   }
 
   return NextResponse.json({ ok: true });

@@ -1,14 +1,17 @@
 // Prisma schema for QLD Youth KOSTA community app.
-// Uses SQLite for zero-setup deployment; swap `provider` for Postgres later.
-// Note: SQLite doesn't support enums natively, so we use String fields with
-// validated values enforced by the application layer (Zod) instead.
+// Uses PostgreSQL in production (e.g. Neon) — swap `provider` to "sqlite"
+// for local-only experiments.
+// Note: the original SQLite design used String fields instead of enums for
+// portability; Postgres would support enums but we kept strings so the same
+// schema works across both engines.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

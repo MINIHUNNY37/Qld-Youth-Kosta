@@ -27,6 +27,12 @@ export const resourceMetaSchema = z.object({
   description: z.string().trim().max(1000).optional(),
 });
 
+export const lyricsResourceSchema = z.object({
+  title: z.string().trim().min(1).max(150),
+  description: z.string().trim().max(1000).optional(),
+  lyrics: z.string().trim().min(1).max(20000),
+});
+
 export const ALLOWED_MIME = {
   "application/pdf": "PDF",
   "image/png": "IMAGE",

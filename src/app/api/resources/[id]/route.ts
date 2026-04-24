@@ -30,8 +30,10 @@ export async function DELETE(
   await prisma.resource.delete({ where: { id: params.id } });
 
   // Best-effort cleanup of the stored file. Ignore errors (missing file, etc.)
-  const diskPath = path.join(process.cwd(), "public", resource.fileUrl);
-  unlink(diskPath).catch(() => {});
+  if (resource.fileUrl) {
+    const diskPath = path.join(process.cwd(), "public", resource.fileUrl);
+    unlink(diskPath).catch(() => {});
+  }
 
   return NextResponse.json({ ok: true });
 }

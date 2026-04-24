@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatDate } from "@/lib/format";
+import { useLang } from "./LanguageProvider";
 
 export type PrayerCardData = {
   id: string;
@@ -25,7 +26,6 @@ const STICKY_BACKGROUNDS = [
 
 const ROTATIONS = ["-rotate-2", "-rotate-1", "rotate-0", "rotate-1", "rotate-2"];
 
-// Stable hash so the same note always gets the same colour + tilt.
 function indexFromId(id: string, max: number): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) {
@@ -35,6 +35,7 @@ function indexFromId(id: string, max: number): number {
 }
 
 export function PrayerCard({ note }: { note: PrayerCardData }) {
+  const { t } = useLang();
   const bg = STICKY_BACKGROUNDS[indexFromId(note.id, STICKY_BACKGROUNDS.length)];
   const tilt = ROTATIONS[indexFromId(note.id + "x", ROTATIONS.length)];
 
@@ -90,7 +91,6 @@ export function PrayerCard({ note }: { note: PrayerCardData }) {
 
   return (
     <div className={`relative pt-5 ${tilt} transition-transform hover:rotate-0 hover:-translate-y-1`}>
-      {/* Tape */}
       <div
         aria-hidden
         className="absolute left-1/2 -translate-x-1/2 top-0 w-20 h-6 rounded-sm bg-tape-amber/70 shadow-sm"
@@ -105,7 +105,7 @@ export function PrayerCard({ note }: { note: PrayerCardData }) {
           {note.isAnonymous ? (
             <span className="badge bg-white/70 text-ink-700">
               <span aria-hidden className="mr-1">🕊️</span>
-              익명 · Anon
+              {t("prayers.anon")}
             </span>
           ) : (
             <span className="badge bg-white/70 text-ink-700">
@@ -123,7 +123,6 @@ export function PrayerCard({ note }: { note: PrayerCardData }) {
         </p>
       </Link>
 
-      {/* Action row (sits visually inside the sticky note) */}
       <div className={`-mt-1 mx-1 ${bg} rounded-b-md px-5 pb-4 pt-2 flex items-center justify-between`}>
         <button
           onClick={handlePray}
@@ -133,10 +132,10 @@ export function PrayerCard({ note }: { note: PrayerCardData }) {
               ? "bg-sunrise-500 text-white cursor-default"
               : "bg-white/80 text-ink-700 hover:bg-white"
           }`}
-          aria-label="I prayed for this"
+          aria-label={t("prayers.iPrayed")}
         >
           <span aria-hidden>🙏</span>
-          {didPray ? "Prayed" : "I prayed"}
+          {didPray ? t("prayers.prayed") : t("prayers.iPrayed")}
           {prayed > 0 && <span className="opacity-80">· {prayed}</span>}
         </button>
 

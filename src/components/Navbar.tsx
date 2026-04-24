@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { getServerLang } from "@/lib/i18n-server";
+import { t } from "@/lib/i18n";
 import { LogoutButton } from "./LogoutButton";
+import { SettingsMenu } from "./SettingsMenu";
 
 export async function Navbar() {
   const session = await getSession();
+  const lang = getServerLang();
 
   return (
     <header className="sticky top-0 z-30 backdrop-blur bg-cream-50/85 border-b border-cream-200">
@@ -22,26 +26,29 @@ export async function Navbar() {
         </Link>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2 text-[15px] font-medium text-ink-700">
-          <NavLink href="/prayers">Prayer Notes</NavLink>
-          <NavLink href="/resources">Worship</NavLink>
-          {session?.role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
+          <NavLink href="/prayers">{t("nav.prayers", lang)}</NavLink>
+          <NavLink href="/resources">{t("nav.worship", lang)}</NavLink>
+          {session?.role === "ADMIN" && (
+            <NavLink href="/admin">{t("nav.admin", lang)}</NavLink>
+          )}
           {session ? (
             <div className="flex items-center gap-2 pl-2">
               <span className="hidden sm:inline text-sm text-ink-700/80">
-                Hi, {session.name}
+                {t("nav.hi", lang)} {session.name}
               </span>
               <LogoutButton />
             </div>
           ) : (
             <div className="flex items-center gap-2 pl-1">
               <Link href="/login" className="btn-secondary !py-1.5 !px-4 text-sm">
-                Sign in
+                {t("nav.signIn", lang)}
               </Link>
               <Link href="/register" className="btn-primary !py-1.5 !px-4 text-sm">
-                Join
+                {t("nav.join", lang)}
               </Link>
             </div>
           )}
+          <SettingsMenu />
         </div>
       </nav>
     </header>

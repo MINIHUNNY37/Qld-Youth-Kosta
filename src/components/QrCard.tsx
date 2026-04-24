@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
-export function QrCard() {
+export function QrCard({ title, body }: { title: string; body: string }) {
   const [url, setUrl] = useState<string>("");
 
   useEffect(() => {
@@ -29,18 +29,9 @@ export function QrCard() {
         )}
       </div>
       <div className="text-center sm:text-left">
-        <h3 className="font-display text-2xl text-ink-800 mb-1">
-          Scan to join
-        </h3>
-        <p className="text-ink-700/80">
-          Open the camera on your phone, point it at this code, and tap the
-          link to share a prayer or browse worship resources.
-        </p>
-        {url && (
-          <p className="mt-3 text-sm text-ink-700/60 break-all">
-            {url}
-          </p>
-        )}
+        <h3 className="font-display text-2xl text-ink-800 mb-1">{title}</h3>
+        <p className="text-ink-700/80">{body}</p>
+        {url && <p className="mt-3 text-sm text-ink-700/60 break-all">{url}</p>}
       </div>
     </div>
   );

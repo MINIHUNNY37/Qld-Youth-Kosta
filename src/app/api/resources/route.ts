@@ -9,6 +9,7 @@ import {
   AllowedMime,
   MAX_UPLOAD_BYTES,
   resourceMetaSchema,
+  lyricsResourceSchema,
 } from "@/lib/validations";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
@@ -32,6 +33,40 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   }
 
+  const ctype = req.headers.get("content-type") ?? "";
+
+  // Branch 1 — JSON payload = lyrics-only resource.
+  if (ctype.includes("application/json")) {
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const parsed = lyricsResourceSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const resource = await prisma.resource.create({
+      data: {
+        title: parsed.data.title,
+        description: parsed.data.description,
+        fileType: "LYRICS",
+        lyrics: parsed.data.lyrics,
+        uploaderId: session.sub,
+      },
+      include: { uploader: { select: { id: true, name: true } } },
+    });
+
+    return NextResponse.json({ resource });
+  }
+
+  // Branch 2 — multipart file upload (PDF / image).
   const form = await req.formData();
   const file = form.get("file");
   const title = form.get("title");

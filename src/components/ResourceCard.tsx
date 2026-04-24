@@ -15,7 +15,8 @@ type Resource = {
   fileType: "PDF" | "IMAGE" | "LYRICS";
   lyricsSnippet?: string | null;
   createdAt: string | Date;
-  uploader: { id: string; name: string };
+  uploaderName: string;
+  isAnonymous: boolean;
 };
 
 export function ResourceCard({
@@ -43,8 +44,6 @@ export function ResourceCard({
   const badgeClass =
     resource.fileType === "PDF"
       ? "bg-berry-500/10 text-berry-600"
-      : resource.fileType === "LYRICS"
-      ? "bg-sunrise-500/15 text-sunrise-600"
       : "bg-sunrise-500/15 text-sunrise-600";
 
   const openLabel =
@@ -53,6 +52,8 @@ export function ResourceCard({
       : resource.fileType === "LYRICS"
       ? t("resources.viewLyrics")
       : t("resources.viewFull");
+
+  const shownName = resource.isAnonymous ? t("prayers.anon") : resource.uploaderName;
 
   return (
     <article className="card flex flex-col gap-3">
@@ -108,7 +109,7 @@ export function ResourceCard({
       <div className="mt-1 flex items-center justify-between text-sm">
         <span className="text-ink-700/70">
           {t("resources.sharedBy")}{" "}
-          <span className="font-semibold">{resource.uploader.name}</span>
+          <span className="font-semibold">{shownName}</span>
         </span>
         <Link
           href={`/resources/${resource.id}`}

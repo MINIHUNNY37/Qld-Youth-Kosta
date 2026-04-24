@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
-// DELETE /api/comments/[id]
-// Allowed only for the comment author OR an admin.
+// DELETE /api/comments/[id] — admin only (comments are anonymous-friendly).
 export async function DELETE(
   _req: Request,
   { params }: { params: { id: string } }
@@ -21,7 +20,8 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const isAuthor = comment.authorId === session.sub;
+  const isAuthor =
+    !!comment.authorId && comment.authorId === session.sub;
   const isAdmin = session.role === "ADMIN";
   if (!isAuthor && !isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

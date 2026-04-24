@@ -17,7 +17,6 @@ export default async function ResourceDetailPage({
   const lang = getServerLang();
   const resource = await prisma.resource.findUnique({
     where: { id: params.id },
-    include: { uploader: { select: { id: true, name: true } } },
   });
 
   if (!resource) notFound();
@@ -46,7 +45,7 @@ export default async function ResourceDetailPage({
         </h1>
         <span className="text-sm text-ink-700/70">
           · {formatDate(resource.createdAt)} · {t("resources.sharedBy", lang)}{" "}
-          {resource.uploader.name}
+          {resource.isAnonymous ? t("prayers.anon", lang) : resource.uploaderName}
         </span>
       </header>
 

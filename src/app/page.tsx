@@ -153,7 +153,8 @@ export default async function HomePage() {
                   {r.title}
                 </Link>
                 <p className="text-sm text-ink-700/75 mt-1">
-                  {t("resources.sharedBy", lang)} {r.uploader.name}
+                  {t("resources.sharedBy", lang)}{" "}
+                  {r.isAnonymous ? t("prayers.anon", lang) : r.uploaderName}
                 </p>
               </li>
             ))}

@@ -24,15 +24,9 @@ export default async function ResourcesPage() {
             {t("resources.subtitle", lang)}
           </p>
         </div>
-        {session ? (
-          <Link href="/resources/new" className="btn-primary whitespace-nowrap">
-            {t("resources.upload", lang)}
-          </Link>
-        ) : (
-          <Link href="/login" className="btn-secondary whitespace-nowrap">
-            {t("resources.signInToUpload", lang)}
-          </Link>
-        )}
+        <Link href="/resources/new" className="btn-primary whitespace-nowrap">
+          {t("resources.upload", lang)}
+        </Link>
       </div>
 
       {resources.length === 0 ? (
@@ -53,12 +47,10 @@ export default async function ResourcesPage() {
                 fileType: r.fileType as "PDF" | "IMAGE" | "LYRICS",
                 lyricsSnippet: r.lyrics ? r.lyrics.slice(0, 240) : null,
                 createdAt: r.createdAt.toISOString(),
-                uploader: { id: r.uploader.id, name: r.uploader.name },
+                uploaderName: r.uploaderName,
+                isAnonymous: r.isAnonymous,
               }}
-              canDelete={
-                !!session &&
-                (session.role === "ADMIN" || session.sub === r.uploaderId)
-              }
+              canDelete={!!session && session.role === "ADMIN"}
             />
           ))}
         </div>

@@ -11,6 +11,7 @@ const EN = {
   "nav.hi": "Hi,",
   "nav.settings": "Settings",
   "nav.language": "Language",
+  "nav.adminSignIn": "Admin sign in",
 
   "home.tagline": "QLD Youth KOSTA",
   "home.heroA": "A warm place to",
@@ -110,6 +111,7 @@ const KO: Record<keyof typeof EN, string> = {
   "nav.hi": "안녕하세요,",
   "nav.settings": "설정",
   "nav.language": "언어",
+  "nav.adminSignIn": "관리자 로그인",
 
   "home.tagline": "QLD 청년 KOSTA",
   "home.heroA": "함께",

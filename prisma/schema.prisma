@@ -34,7 +34,7 @@ model PrayerNote {
   content     String
   status      String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
   isAnonymous Boolean  @default(false)
-  authorName  String   @default("Anon") // shown when isAnonymous is false
+  authorName  String   @default("Anon")
   prayedCount Int      @default(0)
   heartCount  Int      @default(0)
   author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -49,8 +49,10 @@ model PrayerNote {
 model Comment {
   id            String     @id @default(cuid())
   content       String
-  author        User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId      String
+  isAnonymous   Boolean    @default(false)
+  authorName    String     @default("Anon")
+  author        User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId      String?
   prayerNote    PrayerNote @relation(fields: [prayerNoteId], references: [id], onDelete: Cascade)
   prayerNoteId  String
   createdAt     DateTime   @default(now())
@@ -59,16 +61,18 @@ model Comment {
 }
 
 model Resource {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  fileUrl     String?  // present for PDF/IMAGE, null for LYRICS
-  fileName    String?  // present for PDF/IMAGE, null for LYRICS
-  fileType    String   // "PDF" | "IMAGE" | "LYRICS"
-  lyrics      String?  // present when fileType == "LYRICS"
-  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
-  uploaderId  String
-  createdAt   DateTime @default(now())
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  fileUrl      String?  // present for PDF/IMAGE, null for LYRICS
+  fileName     String?  // present for PDF/IMAGE, null for LYRICS
+  fileType     String   // "PDF" | "IMAGE" | "LYRICS"
+  lyrics       String?  // present when fileType == "LYRICS"
+  isAnonymous  Boolean  @default(false)
+  uploaderName String   @default("Anon")
+  uploader     User?    @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+  uploaderId   String?
+  createdAt    DateTime @default(now())
 
   @@index([createdAt])
 }

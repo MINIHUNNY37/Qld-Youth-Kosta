@@ -20,10 +20,6 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  }
-
   const ctype = req.headers.get("content-type") ?? "";
 
   // Branch 1 — JSON payload = lyrics-only resource.
@@ -43,13 +39,20 @@ export async function POST(req: Request) {
       );
     }
 
+    const resolvedName =
+      (parsed.data.uploaderName && parsed.data.uploaderName.length > 0
+        ? parsed.data.uploaderName
+        : session?.name) ?? "Anon";
+
     const resource = await prisma.resource.create({
       data: {
         title: parsed.data.title,
         description: parsed.data.description,
         fileType: "LYRICS",
         lyrics: parsed.data.lyrics,
-        uploaderId: session.sub,
+        isAnonymous: !!parsed.data.isAnonymous,
+        uploaderName: parsed.data.isAnonymous ? "Anon" : resolvedName,
+        uploaderId: session?.sub ?? null,
       },
       include: { uploader: { select: { id: true, name: true } } },
     });
@@ -62,6 +65,8 @@ export async function POST(req: Request) {
   const file = form.get("file");
   const title = form.get("title");
   const description = form.get("description");
+  const uploaderName = form.get("uploaderName");
+  const isAnonymous = form.get("isAnonymous") === "true";
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
@@ -76,6 +81,8 @@ export async function POST(req: Request) {
   const meta = resourceMetaSchema.safeParse({
     title: typeof title === "string" ? title : "",
     description: typeof description === "string" ? description : undefined,
+    uploaderName: typeof uploaderName === "string" ? uploaderName : undefined,
+    isAnonymous,
   });
   if (!meta.success) {
     return NextResponse.json({ error: "Invalid metadata" }, { status: 400 });
@@ -100,12 +107,16 @@ export async function POST(req: Request) {
     );
   }
 
-  // Give the blob a unique, type-scoped name so deletions are easy to trace.
   const blob = await put(`resources/${crypto.randomUUID()}-${file.name}`, file, {
     access: "public",
     contentType: file.type,
     token: process.env.BLOB_READ_WRITE_TOKEN,
   });
+
+  const resolvedName =
+    (meta.data.uploaderName && meta.data.uploaderName.length > 0
+      ? meta.data.uploaderName
+      : session?.name) ?? "Anon";
 
   const resource = await prisma.resource.create({
     data: {
@@ -114,7 +125,9 @@ export async function POST(req: Request) {
       fileUrl: blob.url,
       fileName: file.name,
       fileType: resourceType,
-      uploaderId: session.sub,
+      isAnonymous: !!meta.data.isAnonymous,
+      uploaderName: meta.data.isAnonymous ? "Anon" : resolvedName,
+      uploaderId: session?.sub ?? null,
     },
     include: { uploader: { select: { id: true, name: true } } },
   });

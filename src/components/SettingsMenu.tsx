@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "./LanguageProvider";
 import type { Lang } from "@/lib/i18n";
@@ -9,7 +10,7 @@ const LANG_LABELS: Record<Lang, string> = {
   ko: "한국어",
 };
 
-export function SettingsMenu() {
+export function SettingsMenu({ isSignedIn }: { isSignedIn: boolean }) {
   const { lang, setLang, t } = useLang();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -74,6 +75,19 @@ export function SettingsMenu() {
               )}
             </button>
           ))}
+
+          {!isSignedIn && (
+            <>
+              <div className="my-1 border-t border-cream-200" />
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-ink-700 hover:bg-cream-100"
+              >
+                {t("nav.adminSignIn")}
+              </Link>
+            </>
+          )}
         </div>
       )}
     </div>

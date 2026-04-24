@@ -19,7 +19,6 @@ export default async function PrayerDetailPage({
       author: { select: { id: true, name: true } },
       comments: {
         orderBy: { createdAt: "asc" },
-        include: { author: { select: { id: true, name: true } } },
       },
     },
   });
@@ -77,11 +76,11 @@ export default async function PrayerDetailPage({
             id: c.id,
             content: c.content,
             createdAt: c.createdAt.toISOString(),
-            author: { id: c.author.id, name: c.author.name },
+            authorName: c.authorName,
+            isAnonymous: c.isAnonymous,
           }))}
-          currentUserId={session?.sub ?? null}
           isAdmin={!!isAdmin}
-          isSignedIn={!!session}
+          defaultName={session?.name ?? ""}
         />
       ) : (
         <p className="mt-8 text-ink-700/70 italic">

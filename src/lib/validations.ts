@@ -20,17 +20,23 @@ export const prayerNoteSchema = z.object({
 
 export const commentSchema = z.object({
   content: z.string().trim().min(1).max(2000),
+  authorName: z.string().trim().max(40).optional(),
+  isAnonymous: z.boolean().optional().default(false),
 });
 
 export const resourceMetaSchema = z.object({
   title: z.string().trim().min(1).max(150),
   description: z.string().trim().max(1000).optional(),
+  uploaderName: z.string().trim().max(40).optional(),
+  isAnonymous: z.boolean().optional().default(false),
 });
 
 export const lyricsResourceSchema = z.object({
   title: z.string().trim().min(1).max(150),
   description: z.string().trim().max(1000).optional(),
   lyrics: z.string().trim().min(1).max(20000),
+  uploaderName: z.string().trim().max(40).optional(),
+  isAnonymous: z.boolean().optional().default(false),
 });
 
 export const ALLOWED_MIME = {

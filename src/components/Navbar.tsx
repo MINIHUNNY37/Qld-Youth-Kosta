@@ -31,24 +31,15 @@ export async function Navbar() {
           {session?.role === "ADMIN" && (
             <NavLink href="/admin">{t("nav.admin", lang)}</NavLink>
           )}
-          {session ? (
+          {session && (
             <div className="flex items-center gap-2 pl-2">
               <span className="hidden sm:inline text-sm text-ink-700/80">
                 {t("nav.hi", lang)} {session.name}
               </span>
               <LogoutButton />
             </div>
-          ) : (
-            <div className="flex items-center gap-2 pl-1">
-              <Link href="/login" className="btn-secondary !py-1.5 !px-4 text-sm">
-                {t("nav.signIn", lang)}
-              </Link>
-              <Link href="/register" className="btn-primary !py-1.5 !px-4 text-sm">
-                {t("nav.join", lang)}
-              </Link>
-            </div>
           )}
-          <SettingsMenu />
+          <SettingsMenu isSignedIn={!!session} />
         </div>
       </nav>
     </header>

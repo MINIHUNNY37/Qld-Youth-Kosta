@@ -9,7 +9,7 @@ const MAX_MB = 8;
 
 type Mode = "FILE" | "LYRICS";
 
-export function UploadForm() {
+export function UploadForm({ defaultName }: { defaultName: string }) {
   const router = useRouter();
   const { t } = useLang();
 
@@ -18,6 +18,8 @@ export function UploadForm() {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [lyrics, setLyrics] = useState("");
+  const [uploaderName, setUploaderName] = useState(defaultName);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +41,8 @@ export function UploadForm() {
       fd.set("title", title);
       fd.set("description", description);
       fd.set("file", file);
+      if (!isAnonymous && uploaderName) fd.set("uploaderName", uploaderName);
+      fd.set("isAnonymous", String(isAnonymous));
       const res = await fetch("/api/resources", { method: "POST", body: fd });
       if (res.ok) {
         router.push("/resources");
@@ -57,7 +61,13 @@ export function UploadForm() {
       const res = await fetch("/api/resources", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, lyrics }),
+        body: JSON.stringify({
+          title,
+          description,
+          lyrics,
+          uploaderName: isAnonymous ? undefined : uploaderName,
+          isAnonymous,
+        }),
       });
       if (res.ok) {
         router.push("/resources");
@@ -156,6 +166,31 @@ export function UploadForm() {
           />
         </div>
       )}
+
+      <div>
+        <label htmlFor="uploaderName" className="label">
+          {t("prayerForm.fieldName")}
+        </label>
+        <input
+          id="uploaderName"
+          className="input"
+          value={uploaderName}
+          onChange={(e) => setUploaderName(e.target.value)}
+          maxLength={40}
+          placeholder={t("prayerForm.namePlaceholder")}
+          disabled={isAnonymous}
+        />
+        <label className="mt-2 flex items-center gap-2 text-sm text-ink-700 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={isAnonymous}
+            onChange={(e) => setIsAnonymous(e.target.checked)}
+            className="h-4 w-4 rounded border-cream-200 text-sunrise-500 focus:ring-sunrise-500"
+          />
+          {t("prayerForm.anonLabel")}{" "}
+          <span className="font-semibold">{t("prayers.anon")}</span>)
+        </label>
+      </div>
 
       {error && <p className="text-sm text-berry-600">{error}</p>}
       <div className="flex justify-end gap-3">
